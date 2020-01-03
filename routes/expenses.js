@@ -1,4 +1,4 @@
-//const validateObjectId = require('../middleware/validateObjectId');
+const validateObjectId = require('../middleware/validateObjectId');
 const { validateExpense, expenseModel } = require('../models/expenses');
 // const authMiddleware = require('../middleware/auth');
 // const adminMiddleware = require('../middleware/admin');
@@ -11,19 +11,21 @@ router.get('/', async (req, res) => {
 });
 
 router.post('/', async (req, res) => {
+	console.log('req: ', req.body);
 	const { error } = validateExpense(req.body);
+	console.log('error: ', error);
+
 	if (error) return res.status(400).send(error.details[0].message);
 
 	const expense = await expenseModel.store(req.body);
 	return res.send(expense);
 });
 
-// router.get('/:id', validateObjectId, async (req, res) => {
-// 	const expense = await expenseModel.getExpenseById(req.params.id);
-// 	//const expense = expenses.find((g) => g.id === parseInt(req.params.id));
-// 	if (!expense) return res.status(404).send('The expense with the given id was not found');
-// 	return res.send(expense);
-// });
+router.get('/:id', validateObjectId, async (req, res) => {
+	const expense = await expenseModel.getOne(req.params.id);
+	if (!expense) return res.status(404).send('The expense with the given id was not found');
+	return res.send(expense);
+});
 
 // router.put('/:id', [ authMiddleware, adminMiddleware ], async (req, res) => {
 // 	//const expense = expenses.find((g) => g.id === parseInt(req.params.id));

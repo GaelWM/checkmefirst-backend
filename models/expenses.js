@@ -4,19 +4,22 @@ const mongoose = require('mongoose');
 const expenseSchema = mongoose.Schema({
 	name: {
 		type: String,
-		require: true,
+		required: true,
 		maxLength: 100
 	},
 	description: {
 		type: String,
-		minLenght: 5,
-		maxLength: 255
+		minLength: 5,
+		maxLength: 255,
+		nullable: true
 	},
 	isActive: {
-		type: Boolean
+		type: Boolean,
+		nullable: true
 	},
 	createdAt: {
-		type: Date
+		type: Date,
+		nullable: true
 	}
 });
 
@@ -31,6 +34,7 @@ const getOne = async (id) => {
 };
 
 const store = async (data) => {
+	console.log('data: ', data);
 	const expense = new Expense({
 		name: data.name,
 		description: data.description,
@@ -46,13 +50,15 @@ const update = async (data) => {
 	return await Expense.findById(id);
 };
 
-const validateExpense = (expense) => {
+function validateExpense(expense) {
 	const schema = {
-		name: Joi.string().max(255).required()
+		name: Joi.string().max(255).required(),
+		description: Joi.string().max(255),
+		isActive: Joi.boolean()
 	};
 
 	return Joi.validate(expense, schema);
-};
+}
 
 module.exports.Expense = Expense;
 module.exports.validateExpense = validateExpense;
