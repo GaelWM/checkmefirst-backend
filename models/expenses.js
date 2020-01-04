@@ -15,11 +15,7 @@ const expenseSchema = mongoose.Schema({
 	},
 	isActive: {
 		type: Boolean,
-		nullable: true
-	},
-	createdAt: {
-		type: Date,
-		nullable: true
+		default: true
 	}
 });
 
@@ -34,12 +30,11 @@ const getOne = async (id) => {
 };
 
 const store = async (data) => {
-	console.log('data: ', data);
 	const expense = new Expense({
 		name: data.name,
 		description: data.description,
 		isActive: data.isActive,
-		createdAt: '20200104'
+		createdAt: Date.now()
 	});
 
 	await expense.save();

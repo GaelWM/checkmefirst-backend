@@ -11,7 +11,7 @@ const userSchema = mongoose.Schema({
 	isAdmin: { type: Boolean }
 });
 
-userSchema.methods.getAuthentificationToken = function() {
+userSchema.methods.getAuthentificationToken = function () {
 	return jwt.sign({ _id: this._id, isAdmin: this.isAdmin }, config.get('jwtPrivateKey'));
 };
 
@@ -34,7 +34,6 @@ const getUser = async (obj) => {
 };
 
 const createUser = async (data) => {
-	//console.log(data);
 	const user = new User({
 		name: data.name,
 		email: data.email,
