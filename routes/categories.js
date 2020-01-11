@@ -1,16 +1,17 @@
+
 const validateObjectId = require('../middleware/validateObjectId');
+const authMiddleware = require('../middleware/auth');
+const adminMiddleware = require('../middleware/admin');
 const { validateCategory, categoryModel } = require('../models/categories');
-// const authMiddleware = require('../middleware/auth');
-// const adminMiddleware = require('../middleware/admin');
 const express = require('express');
 const router = express.Router();
 
-router.get('/', async (req, res) => {
+router.get('/', authMiddleware, async (req, res) => {
     const categories = await categoryModel.getCategories();
     res.send(categories);
 });
 
-router.post('/', async (req, res) => {
+router.post('/', [authMiddleware, adminMiddleware], async (req, res) => {
     const { error } = validateCategory(req.body);
     if (error) return res.status(400).send(error.details[0].message);
 
@@ -18,13 +19,13 @@ router.post('/', async (req, res) => {
     return res.send(category);
 });
 
-router.get('/:id', validateObjectId, async (req, res) => {
+router.get('/:id', [authMiddleware, validateObjectId], async (req, res) => {
     const category = await categoryModel.getCategoryById(req.params.id);
     if (!category) return res.status(404).send('The category with the given id was not found');
     return res.send(category);
 });
 
-router.put('/:id', async (req, res) => {
+router.put('/:id', [authMiddleware, adminMiddleware, validateObjectId], async (req, res) => {
     const { error } = validateCategory(req.body);
     if (error) return res.status(400).send(error.details[0].message);
 
@@ -34,7 +35,7 @@ router.put('/:id', async (req, res) => {
     return res.send(category);
 });
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', [authMiddleware, adminMiddleware, validateObjectId], async (req, res) => {
     const category = await categoryModel.getCategoryById(req.params.id);
     if (!category) return res.status(404).send('The category with the given id was not found');
 

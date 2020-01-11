@@ -62,5 +62,6 @@ module.exports.categoryModel = {
     getCategoryById,
     createCategory,
     updateCategory,
-    deleteCategory
+    deleteCategory,
+    categorySchema
 };

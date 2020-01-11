@@ -1,5 +1,5 @@
 const Joi = require('joi');
-const uniqueValidator = require('mongoose-unique-validator');
+//const uniqueValidator = require('mongoose-unique-validator');
 const mongoose = require('mongoose');
 
 const currencySchema = mongoose.Schema({

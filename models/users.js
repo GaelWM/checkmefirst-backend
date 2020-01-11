@@ -1,12 +1,14 @@
 const Joi = require('joi');
 const jwt = require('jsonwebtoken');
 const config = require('config');
+const winston = require('winston');
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt-nodejs');
 
 const userSchema = mongoose.Schema({
-	name: { type: String, required: true, minLength: 5, maxLength: 50 },
-	email: { type: String, unique: true },
+	name: { type: String, required: true, maxLength: 100 },
+	surname: { type: String, required: true, maxLength: 100 },
+	email: { type: String },
 	password: { type: String, minLength: 6 },
 	isAdmin: { type: Boolean }
 });
@@ -36,8 +38,10 @@ const getUser = async (obj) => {
 const createUser = async (data) => {
 	const user = new User({
 		name: data.name,
+		surname: data.surname,
 		email: data.email,
-		password: data.password
+		password: data.password,
+		isAdmin: data.isAdmin
 	});
 
 	try {
@@ -45,20 +49,31 @@ const createUser = async (data) => {
 		user.password = bcrypt.hashSync(data.password, salt);
 		await user.save();
 	} catch (error) {
-		console.log(error);
+		winston.error(error);
 	}
 
 	return user;
 };
 
 const updateUser = async (id, data) => {
+
+	//Hasing the password
+	try {
+		const salt = bcrypt.genSaltSync(10);
+		data.password = bcrypt.hashSync(data.password, salt);
+	} catch (error) {
+		winston.error(error);
+	}
+
 	return await User.findOneAndUpdate(
 		id,
 		{
 			$set: {
 				name: data.name,
+				surname: data.surname,
 				email: data.email,
-				password: data.password
+				password: data.password,
+				isAdmin: data.isAdmin
 			}
 		},
 		{ new: true }
@@ -71,7 +86,8 @@ const deleteUser = async (id) => {
 
 const validateUser = (user) => {
 	const schema = {
-		name: Joi.string().min(3).required(),
+		name: Joi.string().max(100).required(),
+		surname: Joi.string().max(100).required(),
 		email: Joi.string().min(3).max(255).email().required(),
 		password: Joi.string().min(6).max(255).required()
 	};

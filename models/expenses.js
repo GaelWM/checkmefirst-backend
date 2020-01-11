@@ -1,5 +1,6 @@
 const Joi = require('joi');
 const mongoose = require('mongoose');
+const { userModel } = require('./users');
 
 const expenseSchema = mongoose.Schema({
 	name: {
@@ -13,6 +14,14 @@ const expenseSchema = mongoose.Schema({
 		maxLength: 255,
 		nullable: true
 	},
+	userId: { type: mongoose.Types.ObjectId, unique: false, required: true },
+	user: mongoose.Schema({
+		name: { type: String, required: true, maxLength: 100 },
+		surname: { type: String, required: true, maxLength: 100 },
+		email: { type: String },
+		password: { type: String, minLength: 6 },
+		isAdmin: { type: Boolean }
+	}),
 	isActive: {
 		type: Boolean,
 		default: true
@@ -21,18 +30,57 @@ const expenseSchema = mongoose.Schema({
 
 const Expense = mongoose.model('Expense', expenseSchema);
 
-const getAll = async () => {
+const getExpenses = async () => {
 	return await Expense.find().sort('name');
 };
 
-const getOne = async (id) => {
+const getExpenseById = async (id) => {
 	return await Expense.findById(id);
 };
 
-const store = async (data) => {
+const getUserExpenses = async () => {
+	return await Expense.aggregate([
+		{
+			$lookup:
+			{
+				from: "users",
+				localField: "userId",
+				foreignField: "_id",
+				as: "user_expenses"
+			}
+		}
+	]);
+}
+
+const getExpenseItems = async () => {
+	return await Expense.aggregate([
+		{
+			$lookup:
+			{
+				from: "expenses-items",
+				let: { expense_item: "$_id" },
+				pipeline: [
+					{
+						$match:
+						{
+							$expr:
+								{ $eq: ["$_id", "$$expense_item"] },
+						}
+					}
+				],
+				as: "expenseItems"
+			}
+		}
+	]);
+}
+
+const createExpense = async (data, userId) => {
+	const user = await userModel.getUserByIdExcludePassword(userId);
 	const expense = new Expense({
 		name: data.name,
 		description: data.description,
+		userId: userId,
+		user: user,
 		isActive: data.isActive,
 		createdAt: Date.now()
 	});
@@ -41,8 +89,12 @@ const store = async (data) => {
 	return expense;
 };
 
-const update = async (data) => {
+const updateExpense = async (data) => {
 	return await Expense.findById(id);
+};
+
+const deleteExpense = async (id) => {
+	return await Expense.findByIdAndDelete(id);
 };
 
 function validateExpense(expense) {
@@ -58,8 +110,15 @@ function validateExpense(expense) {
 module.exports.Expense = Expense;
 module.exports.validateExpense = validateExpense;
 module.exports.expenseModel = {
-	getAll,
-	getOne,
-	store,
-	update
+	getExpenses,
+	getExpenseById,
+	createExpense,
+	updateExpense,
+	deleteExpense,
+	expenseSchema,
+
+	//Custom queries
+	getUserExpenses,
+	getExpenseItems,
+	getUserExpenses
 };
