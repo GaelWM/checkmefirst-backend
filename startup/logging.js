@@ -7,34 +7,13 @@ module.exports = function () {
 	//winston.format.simple();
 	//Catches uncaught exceptions and logs in with winston.
 	winston.exceptions.handle(
-		new winston.transports.Console({
-			format: winston.format.json(),
-			colorize: true,
-			prettyPrint: true,
-			handleExceptions: true,
-			timestamp: true
-		}),
-		new winston.transports.File({
-			filename: 'uncaughtException.log',
-			format: winston.format.combine(
-				winston.format.timestamp({
-					format: 'YYYY-MM-DD hh:mm:ss A ZZ',
-				}),
-				winston.format.json()
-			)
-		})
+		new winston.transports.Console({ colorize: true, prettyPrint: true }),
+		new winston.transports.File({ filename: 'uncaughtException.log' })
 	);
 
-	// //Catches unhandledRejection exceptions and logs in with winston.
+	// Catches unhandledRejection exceptions and logs in with winston.
 	process.on('unhandledRejection', (ex) => {
-		// throw ex;
-		winston.log(ex).add(new winston.transports.Console({
-			format: winston.format.simple(),
-			colorize: true,
-			prettyPrint: true,
-			handleExceptions: true,
-			timestamp: true
-		}));
+		throw ex;
 	});
 
 	winston.add(new winston.transports.File({ filename: 'logfile.log', timestamp: true }));

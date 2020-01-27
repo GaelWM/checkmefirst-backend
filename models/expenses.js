@@ -1,12 +1,16 @@
 const Joi = require('joi');
+const _ = require('lodash');
 const mongoose = require('mongoose');
+const uniqueValidator = require('mongoose-unique-validator');
 const { userModel } = require('./users');
 
 const expenseSchema = mongoose.Schema({
 	name: {
 		type: String,
 		required: true,
-		maxLength: 100
+		maxLength: 100,
+		unique: true,
+		uniqueCaseInsensitive: true
 	},
 	description: {
 		type: String,
@@ -14,18 +18,19 @@ const expenseSchema = mongoose.Schema({
 		maxLength: 255,
 		nullable: true
 	},
-	userId: { type: mongoose.Types.ObjectId, unique: false, required: true },
 	user: mongoose.Schema({
 		name: { type: String, required: true, maxLength: 100 },
 		surname: { type: String, required: true, maxLength: 100 },
 		email: { type: String },
-		password: { type: String, minLength: 6 },
-		isAdmin: { type: Boolean }
 	}),
 	isActive: {
 		type: Boolean,
 		default: true
 	}
+});
+
+expenseSchema.plugin(uniqueValidator, {
+	message: 'Error, expected {PATH} to be unique.'
 });
 
 const Expense = mongoose.model('Expense', expenseSchema);
@@ -38,16 +43,17 @@ const getExpenseById = async (id) => {
 	return await Expense.findById(id);
 };
 
-const getUserExpenses = async () => {
+const getUserExpenses = async (userId) => {
 	return await Expense.aggregate([
 		{
+			"let": { "exaId": "$_id" },
 			$lookup:
 			{
 				from: "users",
 				localField: "userId",
 				foreignField: "_id",
 				as: "user_expenses"
-			}
+			},
 		}
 	]);
 }
@@ -79,18 +85,22 @@ const createExpense = async (data, userId) => {
 	const expense = new Expense({
 		name: data.name,
 		description: data.description,
-		userId: userId,
-		user: user,
-		isActive: data.isActive,
-		createdAt: Date.now()
+		user: _.pick(user, ['_id', 'name', 'surname', 'email']),
+		isActive: data.isActive
 	});
 
 	await expense.save();
 	return expense;
 };
 
-const updateExpense = async (data) => {
-	return await Expense.findById(id);
+const updateExpense = async (id, userId, data) => {
+	const user = await userModel.getUserByIdExcludePassword(userId);
+	return await Expense.findByIdAndUpdate(id, {
+		name: data.name,
+		description: data.description,
+		user: _.pick(user, ['_id', 'name', 'surname', 'email']),
+		isActive: data.isActive
+	}, { new: true });
 };
 
 const deleteExpense = async (id) => {

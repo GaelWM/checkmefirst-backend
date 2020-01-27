@@ -1,6 +1,6 @@
 const _ = require('lodash');
 const express = require('express');
-const { validate, userModel } = require('../models/users');
+const { validateUser, userModel } = require('../models/users');
 const authMiddleware = require('../middleware/auth');
 const router = express.Router();
 
@@ -17,16 +17,16 @@ router.get('/', async (req, res) => {
 });
 
 router.post('/', async (req, res) => {
-    const { error } = validate(req.body);
+    const { error } = validateUser(req.body);
     if (error) return res.status(400).send(error.details[0].message);
 
     let user = await userModel.getUser({ email: req.body.email });
     if (user) return res.status(404).send('The user is already registered.');
 
-    user = await userModel.createUser(_.pick(req.body, ['name', 'surname', 'email', 'password', 'isAdmin']));
+    user = await userModel.createUser(req.body);
 
     const token = user.getAuthentificationToken();
-    return res.header('x-auth-token', token).send(_.pick(user, ['_id', 'name', 'surname', 'email']));
+    return res.header('x-auth-token', token).send(_.pick(user, ['_id', 'name', 'surname', 'email', 'isAdmin', 'isActive']));
 });
 
 router.get('/:id', async (req, res) => {
@@ -38,7 +38,7 @@ router.get('/:id', async (req, res) => {
 });
 
 router.put('/:id', async (req, res) => {
-    const { error } = validate(req.body);
+    const { error } = validateUser(req.body);
     if (error) return res.status(400).send(error.details[0].message);
 
     const user = await userModel.updateUser(req.params.id, req.body);

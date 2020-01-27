@@ -12,6 +12,9 @@ router.get('/', authMiddleware, async (req, res) => {
 });
 
 router.post('/', [authMiddleware, adminMiddleware], async (req, res) => {
+    let category = await categoryModel.getCategoryByName(req.body.name);
+    if (category) return res.status(404).send('The category already exist.');
+
     const { error } = validateCategory(req.body);
     if (error) return res.status(400).send(error.details[0].message);
 

@@ -21,6 +21,10 @@ const getCategoryById = async (id) => {
     return await Category.findById(id);
 };
 
+const getCategoryByName = async (name) => {
+    return await Category.findOne({ name: { $regex: new RegExp("^" + name.toLowerCase(), "i") } });
+};
+
 const createCategory = async (data) => {
     const category = new Category({
         name: data.name
@@ -32,7 +36,7 @@ const createCategory = async (data) => {
 };
 
 const updateCategory = async (id, data) => {
-    return await Category.findOneAndUpdate(
+    return await Category.findByIdAndUpdate(
         id,
         {
             $set: {
@@ -49,7 +53,7 @@ const deleteCategory = async (id) => {
 
 function validateCategory(category) {
     const schema = {
-        name: Joi.string().max(10).required(),
+        name: Joi.string().max(50).required(),
     };
 
     return Joi.validate(category, schema);
@@ -63,5 +67,6 @@ module.exports.categoryModel = {
     createCategory,
     updateCategory,
     deleteCategory,
+    getCategoryByName,
     categorySchema
 };

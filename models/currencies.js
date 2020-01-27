@@ -1,11 +1,12 @@
 const Joi = require('joi');
-//const uniqueValidator = require('mongoose-unique-validator');
+const uniqueValidator = require('mongoose-unique-validator');
 const mongoose = require('mongoose');
 
 const currencySchema = mongoose.Schema({
     name: {
         type: String,
         required: true,
+        unique: true,
         maxLength: 10,
     },
     unitDollarRate: {
@@ -14,7 +15,10 @@ const currencySchema = mongoose.Schema({
     },
 });
 
-//currencySchema.plugin(uniqueValidator);
+currencySchema.plugin(uniqueValidator, {
+    message: 'Error, expected {PATH} to be unique.'
+});
+
 const Currency = mongoose.model('Currency', currencySchema);
 
 const getCurrencies = async () => {
@@ -26,7 +30,7 @@ const getCurrencyById = async (id) => {
 };
 
 const getCurrencyByName = async (name) => {
-    return await Currency.findOne({ name });
+    return await Currency.findOne({ name: { $regex: new RegExp("^" + name.toLowerCase(), "i") } });
 };
 
 const createCurrency = async (data) => {
@@ -41,7 +45,7 @@ const createCurrency = async (data) => {
 };
 
 const updateCurrency = async (id, data) => {
-    return await Currency.findOneAndUpdate(
+    return await Currency.findByIdAndUpdate(
         id,
         {
             $set: {

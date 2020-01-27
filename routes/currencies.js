@@ -11,7 +11,7 @@ router.get('/', authMiddleware, async (req, res) => {
 });
 
 router.post('/', [authMiddleware, adminMiddleware], async (req, res) => {
-    let currency = await currencyModel.getCurrencyByName({ name: req.body.name });
+    let currency = await currencyModel.getCurrencyByName(req.body.name);
     if (currency) return res.status(404).send('The currency already exist.');
 
     const { error } = validateCurrency(req.body);
