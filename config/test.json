@@ -1,0 +1,5 @@
+{
+	"jwtPrivateKey": "123456",
+	"db": "mongodb://localhost/checkmefirst_tests",
+	"PORT": "3001"
+}

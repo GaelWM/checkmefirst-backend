@@ -15,7 +15,7 @@ const userSchema = mongoose.Schema({
 	isActive: { type: Boolean, default: true, required: true }
 });
 
-userSchema.methods.getAuthentificationToken = function () {
+userSchema.methods.getAuthenticationToken = function () {
 	return jwt.sign({ _id: this._id, isAdmin: this.isAdmin }, config.get('jwtPrivateKey'));
 };
 
@@ -63,7 +63,7 @@ const createUser = async (data) => {
 };
 
 const updateUser = async (id, data) => {
-	//Hasing the password
+	//Hashing the password
 	try {
 		const salt = bcrypt.genSaltSync(10);
 		data.password = bcrypt.hashSync(data.password, salt);
