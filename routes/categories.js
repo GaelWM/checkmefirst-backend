@@ -11,7 +11,7 @@ router.get('/', authMiddleware, async (req, res) => {
     res.send(categories);
 });
 
-router.post('/', [authMiddleware, adminMiddleware], async (req, res) => {
+router.post('/', authMiddleware, async (req, res) => {
     let category = await categoryModel.getCategoryByName(req.body.name);
     if (category) return res.status(404).send('The category already exist.');
 
@@ -28,7 +28,7 @@ router.get('/:id', [authMiddleware, validateObjectId], async (req, res) => {
     return res.send(category);
 });
 
-router.put('/:id', [authMiddleware, adminMiddleware, validateObjectId], async (req, res) => {
+router.put('/:id', [authMiddleware, validateObjectId], async (req, res) => {
     const { error } = validateCategory(req.body);
     if (error) return res.status(400).send(error.details[0].message);
 
@@ -38,7 +38,7 @@ router.put('/:id', [authMiddleware, adminMiddleware, validateObjectId], async (r
     return res.send(category);
 });
 
-router.delete('/:id', [authMiddleware, adminMiddleware, validateObjectId], async (req, res) => {
+router.delete('/:id', [authMiddleware, validateObjectId], async (req, res) => {
     const category = await categoryModel.getCategoryById(req.params.id);
     if (!category) return res.status(404).send('The category with the given id was not found');
 

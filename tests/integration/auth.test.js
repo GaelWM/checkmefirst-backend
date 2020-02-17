@@ -1,16 +1,14 @@
 const { User } = require('../../models/users');
 const { Category } = require('../../models/categories');
 const request = require('supertest');
-const mongoose = require('mongoose');
 
 let server;
 let token;
 let name;
-const user = { _id: mongoose.Types.ObjectId().toHexString(), isAdmin: true }
 describe('auth middleware', () => {
     beforeEach(() => {
         server = require('../../index');
-        token = new User(user).getAuthenticationToken();
+        token = new User().getAuthenticationToken();
         name = 'Foodies';
     });
 
