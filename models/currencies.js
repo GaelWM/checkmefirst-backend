@@ -11,7 +11,7 @@ const currencySchema = mongoose.Schema({
     },
     unitDollarRate: {
         type: Number,
-        required: true,
+        required: false,
     },
 });
 
@@ -63,8 +63,8 @@ const deleteCurrency = async (id) => {
 
 function validateCurrency(currency) {
     const schema = {
-        name: Joi.string().max(10).required(),
-        unitDollarRate: Joi.number().required(),
+        name: Joi.string().required(),
+        unitDollarRate: Joi.number(),
     };
 
     return Joi.validate(currency, schema);

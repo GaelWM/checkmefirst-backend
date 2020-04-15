@@ -18,6 +18,22 @@ const expenseSchema = mongoose.Schema({
 		maxLength: 255,
 		nullable: true
 	},
+	totalPrice: {
+		type: Number,
+		nullable: true
+	},
+	status: {
+		type: String,
+		minLength: 2,
+		maxLength: 50,
+		required: true
+	},
+	color: {
+		type: String,
+		minLength: 2,
+		maxLength: 50,
+		nullable: true
+	},
 	user: mongoose.Schema({
 		name: { type: String, required: true, maxLength: 100 },
 		surname: { type: String, required: true, maxLength: 100 },
@@ -111,6 +127,7 @@ function validateExpense(expense) {
 	const schema = {
 		name: Joi.string().max(255).required(),
 		description: Joi.string().max(255),
+		status: Joi.string().max(255),
 		isActive: Joi.boolean()
 	};
 

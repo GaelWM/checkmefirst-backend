@@ -10,7 +10,9 @@ const userSchema = mongoose.Schema({
 	name: { type: String, required: true, maxLength: 100 },
 	surname: { type: String, required: true, maxLength: 100 },
 	email: { type: String, unique: true, uniqueCaseInsensitive: true },
+	gender: { type: String, minLength: 4, maxLength: 50 },
 	password: { type: String, minLength: 6 },
+	remember: { type: String },
 	isAdmin: { type: Boolean, required: false },
 	isActive: { type: Boolean, default: true, required: true }
 });
@@ -45,8 +47,10 @@ const createUser = async (data) => {
 	const user = new User({
 		name: data.name,
 		surname: data.surname,
+		gender: data.gender,
 		email: data.email,
 		password: data.password,
+		remember: data.remember,
 		isAdmin: data.isAdmin,
 		isActive: data.isActive
 	});
@@ -77,8 +81,10 @@ const updateUser = async (id, data) => {
 			$set: {
 				name: data.name,
 				surname: data.surname,
+				gender: data.gender,
 				email: data.email,
 				password: data.password,
+				remember: data.remember,
 				isAdmin: data.isAdmin,
 				isActive: data.isActive
 			}
