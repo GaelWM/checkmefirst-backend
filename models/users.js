@@ -101,8 +101,10 @@ const validateUser = (user) => {
 	const schema = {
 		name: Joi.string().max(100).required(),
 		surname: Joi.string().max(100).required(),
+		gender: Joi.string().min(4).max(50).required(),
 		email: Joi.string().min(3).max(255).email().required(),
-		password: Joi.string().min(6).max(255).required(),
+		password: Joi.string().required(),
+		remember: Joi.string(),
 		isAdmin: Joi.boolean(),
 		isActive: Joi.boolean()
 	};

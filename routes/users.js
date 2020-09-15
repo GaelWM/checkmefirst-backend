@@ -2,6 +2,7 @@ const _ = require('lodash');
 const express = require('express');
 const { validateUser, userModel } = require('../models/users');
 const authMiddleware = require('../middleware/auth');
+const adminMiddleware = require('../middleware/admin');
 const router = express.Router();
 
 router.get('/me', authMiddleware, async (req, res) => {
@@ -11,12 +12,12 @@ router.get('/me', authMiddleware, async (req, res) => {
     return res.send(user);
 });
 
-router.get('/', async (req, res) => {
+router.get('/', authMiddleware, async (req, res) => {
     const users = await userModel.getUsers();
     res.send(users);
 });
 
-router.post('/', async (req, res) => {
+router.post('/', [authMiddleware, adminMiddleware], async (req, res) => {
     const { error } = validateUser(req.body);
     if (error) return res.status(400).send(error.details[0].message);
 
@@ -25,11 +26,11 @@ router.post('/', async (req, res) => {
 
     user = await userModel.createUser(req.body);
 
-    const token = user.getAuthentificationToken();
+    const token = user.getAuthenticationToken();
     return res.header('x-auth-token', token).send(_.pick(user, ['_id', 'name', 'surname', 'email', 'isAdmin', 'isActive']));
 });
 
-router.get('/:id', async (req, res) => {
+router.get('/:id', authMiddleware, async (req, res) => {
     const user = await userModel.getUserById(req.params.id);
 
     if (!user) return res.status(404).send('The user with the given id was not found');
@@ -37,7 +38,7 @@ router.get('/:id', async (req, res) => {
     return res.send(user);
 });
 
-router.put('/:id', async (req, res) => {
+router.put('/:id', [authMiddleware, adminMiddleware], async (req, res) => {
     const { error } = validateUser(req.body);
     if (error) return res.status(400).send(error.details[0].message);
 
@@ -47,11 +48,11 @@ router.put('/:id', async (req, res) => {
     return res.send(user);
 });
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', [authMiddleware, adminMiddleware], async (req, res) => {
     const user = await userModel.getUserById(req.params.id);
     if (!user) return res.status(404).send('The user with the given id was not found');
 
-    const result = await userModel.deleteUser(req.params.id);
+    await userModel.deleteUser(req.params.id);
 
     return res.send(user);
 });

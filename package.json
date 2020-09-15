@@ -5,15 +5,13 @@
 	"main": "index.js",
 	"scripts": {
 		"test": "jest --watchAll --runInBand --detectOpenHandles --verbose --unhandled-rejections=strict",
-		"start": "node index.js"
+		"start": "nodemon index.js"
 	},
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/GaelWM/checkmefirst-backend.git"
 	},
-	"keywords": [
-		"Backend"
-	],
+	"keywords": [ "Backend" ],
 	"author": "Gael Wamba Musikingala",
 	"license": "ISC",
 	"bugs": {
